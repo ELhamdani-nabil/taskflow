@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
+import { useAuth } from './features/auth/AuthContext';
+import Login from './features/auth/Login';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import MainContent from './components/MainContent';
-import Spinner from './components/Spinner';
-import ErrorMessage from './components/ErrorMessage';
+// import Tooltip from './components/Tooltip'; 
 
 interface Project {
   id: string;
@@ -16,12 +17,13 @@ interface Column {
   tasks: string[];
 }
 
-export default function App() {
+
+function Dashboard() {
+  const { state: authState, dispatch } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [projects, setProjects] = useState<Project[]>([]);
   const [columns, setColumns] = useState<Column[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchData() {
@@ -30,37 +32,45 @@ export default function App() {
           fetch('http://localhost:4000/projects'),
           fetch('http://localhost:4000/columns'),
         ]);
-
-        if (!projRes.ok || !colRes.ok) {
-          throw new Error('Erreur réseau');
-        }
-
-        const projData = await projRes.json();
-        const colData = await colRes.json();
-
-        setProjects(projData);
-        setColumns(colData);
-      } catch (err) {
-        setError('Impossible de charger les données. Vérifiez que json-server est lancé sur le port 4000.');
-        console.error(err);
+        setProjects(await projRes.json());
+        setColumns(await colRes.json());
+      } catch (e) {
+        console.error(e);
       } finally {
         setLoading(false);
       }
     }
-
     fetchData();
   }, []);
 
-  if (loading) return <Spinner />;
-  if (error) return <ErrorMessage message={error} />;
+  if (loading) return <div style={{ padding: '2rem' }}>Chargement...</div>;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100vh' }}>
-      <Header title="TaskFlow" onMenuClick={() => setSidebarOpen(prev => !prev)} />
+      <Header
+        title="TaskFlow"
+        onMenuClick={() => setSidebarOpen(prev => !prev)}
+        userName={authState.user?.name}
+        onLogout={() => dispatch({ type: 'LOGOUT' })}
+      />
       <div style={{ display: 'flex', flex: 1, overflow: 'hidden' }}>
         <Sidebar projects={projects} isOpen={sidebarOpen} />
-        <MainContent columns={columns} />
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          {/* <Tooltip />  */}
+          <MainContent columns={columns} />
+        </div>
       </div>
     </div>
   );
+}
+
+
+export default function App() {
+  const { state: authState } = useAuth();
+
+  if (!authState.user) {
+    return <Login />;
+  }
+
+  return <Dashboard />;
 }
