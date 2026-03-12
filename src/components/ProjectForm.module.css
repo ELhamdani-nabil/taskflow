@@ -1,0 +1,53 @@
+.form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.input {
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.input:focus {
+  border-color: #1B8C3E;
+  outline: none;
+}
+
+.colorPicker {
+  width: 40px;
+  height: 36px;
+  border: none;
+  cursor: pointer;
+}
+
+.submit {
+  padding: 0.5rem 1rem;
+  background: #1B8C3E;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.submit:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.cancel {
+  padding: 0.5rem 1rem;
+  background: #ccc;
+  color: black;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.cancel:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
